@@ -5,4 +5,10 @@
     <string name="best_score">Best Score</string>
     <string name="start_screen_background">Start screen background</string>
     <string name="game_name">The name of the game</string>
+
+    //Game screen
+    <string name="player_car">Player car</string>
+    <string name="move_left">Move Left</string>
+    <string name="move_right">Move Right</string>
+
 </resources>
