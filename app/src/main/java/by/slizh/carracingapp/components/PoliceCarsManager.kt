@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import by.slizh.carracingapp.PoliceCarState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlin.random.Random
 
 
@@ -24,7 +25,7 @@ fun PoliceCarsManager(modifier: Modifier = Modifier) {
     val minGap = with(density) { (120..160).random().dp.toPx() }
 
     LaunchedEffect(Unit) {
-        while (true) {
+        while (isActive) {
             delay(1000)
 
             val totalLanes = listOf(0, 1, 2).shuffled()
@@ -47,7 +48,7 @@ fun PoliceCarsManager(modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(Unit) {
-        while (true) {
+        while (isActive) {
             delay(16L)
             policeCars.forEachIndexed { index, enemy ->
                 policeCars[index] = enemy.copy(offsetY = enemy.offsetY + roadSpeed.floatValue)
