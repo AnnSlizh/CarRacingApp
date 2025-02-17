@@ -19,14 +19,44 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Road() {
+    val lineWidth = 10.dp
+    val density = LocalDensity.current
+    val lineWidthPx = with(density) { lineWidth.toPx() }
+    val offsetY = rememberRoadSpeed()
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val roadWidth = size.width * 0.9f
+        val roadStartX = (size.width - roadWidth) / 2
+        val laneWidth = roadWidth / 3
+
+        drawRect(
+            color = Color.DarkGray,
+            topLeft = Offset(roadStartX, 0f),
+            size = Size(roadWidth, size.height)
+        )
+
+        for (i in 1..2) {
+            val lineX = roadStartX + laneWidth * i - lineWidthPx / 2
+            var startY = offsetY - with(density) { (80.dp + 30.dp).toPx() }
+
+            while (startY < size.height) {
+                drawRect(
+                    color = Color.White,
+                    topLeft = Offset(lineX, startY),
+                    size = Size(lineWidthPx, with(density) { 80.dp.toPx() })
+                )
+                startY += with(density) { (80.dp + 30.dp).toPx() }
+            }
+        }
+    }
+}
+
+@Composable
+fun rememberRoadSpeed(): Float {
     val lineHeight = 80.dp
     val lineSpacing = 30.dp
-    val lineWidth = 10.dp
-
     val density = LocalDensity.current
-    val lineHeightPx = with(density) { lineHeight.toPx() }
-    val lineSpacingPx = with(density) { lineSpacing.toPx() }
-    val totalLineOffset = lineHeightPx + lineSpacingPx
+    val totalLineOffset = with(density) { (lineHeight + lineSpacing).toPx() }
 
     val transition = rememberInfiniteTransition(label = "")
     val offsetY by transition.animateFloat(
@@ -38,30 +68,5 @@ fun Road() {
         ), label = ""
     )
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val roadWidth = size.width * 0.9f
-        val roadStartX = (size.width - roadWidth) / 2
-        val laneWidth = roadWidth / 3
-        val lineWidthPx = with(density) { lineWidth.toPx() }
-
-        drawRect(
-            color = Color.DarkGray,
-            topLeft = Offset(roadStartX, 0f),
-            size = Size(roadWidth, size.height)
-        )
-
-        for (i in 1..2) {
-            val lineX = roadStartX + laneWidth * i - lineWidthPx / 2
-            var startY = offsetY - totalLineOffset
-
-            while (startY < size.height) {
-                drawRect(
-                    color = Color.White,
-                    topLeft = Offset(lineX, startY),
-                    size = Size(lineWidthPx, lineHeightPx)
-                )
-                startY += totalLineOffset
-            }
-        }
-    }
+    return offsetY
 }
