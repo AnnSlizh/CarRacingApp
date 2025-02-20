@@ -2,67 +2,62 @@ package by.slizh.carracingapp.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import by.slizh.carracingapp.PoliceCarState
+import androidx.compose.runtime.MutableState
+import by.slizh.carracingapp.GameState
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlin.random.Random
-
 
 @Composable
-fun PoliceCarsManager(modifier: Modifier = Modifier) {
-    val policeCars = remember { mutableStateListOf<PoliceCarState>() }
-    val density = LocalDensity.current
-    val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
-    val roadSpeed = remember { mutableFloatStateOf(2.5f) }
-    val carHeightPx = with(density) { 100.dp.toPx() }
-    val minGap = with(density) { (120..160).random().dp.toPx() }
+fun PoliceCarManager(
+    gameState: MutableState<GameState>,
+    screenHeight: Float,
+    carHeight: Float,
+) {
+    val roadSpeed = 3.5f
 
     LaunchedEffect(Unit) {
-        while (isActive) {
-            delay(1000)
+        while (!gameState.value.gameOver && gameState.value.timeLeft > 0) {
+            delay(1000L)
 
-            val totalLanes = listOf(0, 1, 2).shuffled()
-            val chosenLanes = totalLanes.take(Random.nextInt(1, 3))
-            val occupiedLanes = policeCars.map { it.lane to it.offsetY }
+            val occupiedLanes = gameState.value.obstacles
+                .filter { it.second < 150f }
+                .map { it.first }
 
-            val availableLanes = chosenLanes.filter { lane ->
-                occupiedLanes.none { (existingLane, y) ->
-                    existingLane == lane && y < minGap
-                }
-            }
+            val availableLanes = Lane.entries.filterNot { it in occupiedLanes }
 
             if (availableLanes.isNotEmpty()) {
-                availableLanes.forEach { lane ->
-                    policeCars.add(PoliceCarState(lane, offsetY = -carHeightPx))
-                }
+                val newCarLane = availableLanes.random()
+                gameState.value = gameState.value.copy(
+                    obstacles = gameState.value.obstacles + (newCarLane to -carHeight)
+                )
             }
-            policeCars.removeAll { it.offsetY > screenHeight }
         }
     }
 
     LaunchedEffect(Unit) {
-        while (isActive) {
+        while (!gameState.value.gameOver && gameState.value.timeLeft > 0) {
             delay(16L)
-            policeCars.forEachIndexed { index, enemy ->
-                policeCars[index] = enemy.copy(offsetY = enemy.offsetY + roadSpeed.floatValue)
+
+            val updatedObstacles = gameState.value.obstacles.map { (x, y) -> x to y + roadSpeed }
+                .filter { (_, y) -> y < screenHeight }
+
+            val collision = updatedObstacles.any { (lane, y) ->
+                lane == gameState.value.playerLane &&
+                        y < gameState.value.playerY + 80f &&
+                        y + 80f > gameState.value.playerY
             }
+
+            val newScore = gameState.value.score + gameState.value.obstacles.count { (_, y) ->
+                y < gameState.value.playerY && y + roadSpeed >= gameState.value.playerY
+            }
+
+            gameState.value = gameState.value.copy(
+                obstacles = updatedObstacles,
+                score = newScore,
+                gameOver = collision
+            )
         }
     }
-
-    policeCars.forEach { enemy ->
-        PoliceCar(
-            lanePosition = enemy.lane,
-            offsetY = enemy.offsetY,
-            modifier = modifier
-        )
-    }
 }
+
 
 
