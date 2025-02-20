@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import by.slizh.carracingapp.screens.GameScreen
 import by.slizh.carracingapp.ui.theme.CarRacingAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,10 +20,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             CarRacingAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    StartScreen(modifier = Modifier.padding(innerPadding))
+                    GameScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
     }
 }
-
