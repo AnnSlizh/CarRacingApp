@@ -17,13 +17,9 @@ import androidx.compose.ui.unit.dp
 import by.slizh.carracingapp.R
 
 @Composable
-fun CarControlButton(
-    modifier: Modifier = Modifier,
-    onMoveLeft: () -> Unit,
-    onMoveRight: () -> Unit
-) {
+fun CarControlButton(onMoveLeft: () -> Unit, onMoveRight: () -> Unit) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -35,8 +31,6 @@ fun CarControlButton(
                 .size(80.dp)
                 .clickable { onMoveLeft() }
         )
-
-        Spacer(modifier = Modifier.width(100.dp)) 
 
         Image(
             painter = painterResource(id = R.drawable.right_arrow),
