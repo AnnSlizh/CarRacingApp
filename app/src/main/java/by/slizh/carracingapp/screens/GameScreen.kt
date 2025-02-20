@@ -3,36 +3,45 @@ package by.slizh.carracingapp.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
+import by.slizh.carracingapp.GameViewModel
 import by.slizh.carracingapp.components.CarControlButton
 import by.slizh.carracingapp.components.PlayerCar
+import by.slizh.carracingapp.components.PoliceCar
 import by.slizh.carracingapp.components.Road
-import by.slizh.carracingapp.ui.theme.LightGray
 
 @Composable
-fun GameScreen(modifier: Modifier = Modifier) {
-    var playerPosition by remember { mutableIntStateOf(1) }
+fun GameScreen(modifier: Modifier, viewModel: GameViewModel = hiltViewModel()) {
+    val gameState by viewModel.gameState.collectAsState()
 
     Box(
         modifier = modifier
-            .background(LightGray)
+            .background(Color.Gray)
     ) {
         Road()
 
         PlayerCar(
-            lanePosition = playerPosition,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            playerLane = gameState.playerLane,
+            playerCarY = gameState.playerY
         )
 
-        CarControlButton(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            onMoveLeft = { if (playerPosition > 0) playerPosition-- },
-            onMoveRight = { if (playerPosition < 2) playerPosition++ }
-        )
+        gameState.obstacles.forEach { (x, y) ->
+            PoliceCar(
+                lane = x,
+                y = y
+            )
+        }
+
     }
+
+    CarControlButton(
+        onMoveLeft = { viewModel.movePlayerLeft() },
+        onMoveRight = { viewModel.movePlayerRight() }
+    )
 }
+
+
