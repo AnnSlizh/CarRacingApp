@@ -1,4 +1,4 @@
-package by.slizh.carracingapp
+package by.slizh.carracingapp.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,16 +22,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import by.slizh.carracingapp.R
+import by.slizh.carracingapp.navigation.Screen
 import by.slizh.carracingapp.ui.theme.Red
 
 @Composable
-fun StartScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-    ) {
+fun StartScreen(navController: NavController) {
+    Box {
         Image(
             modifier = Modifier.fillMaxSize(),
             painter = painterResource(id = R.drawable.background),
@@ -95,7 +95,11 @@ fun StartScreen(modifier: Modifier = Modifier) {
                     containerColor = Color.White,
                     contentColor = Black
                 ),
-                onClick = { }) {
+                onClick = {
+                    navController.navigate(
+                        Screen.GameScreen.route
+                    )
+                }) {
 
                 Text(
                     text = stringResource(id = R.string.start_game),
@@ -105,10 +109,4 @@ fun StartScreen(modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-@Preview(showSystemUi = true)
-@Composable()
-fun StartScreenPreview() {
-    StartScreen()
 }
