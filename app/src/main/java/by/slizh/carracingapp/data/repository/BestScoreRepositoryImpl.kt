@@ -14,7 +14,7 @@ class BestScoreRepositoryImpl @Inject constructor(
 ) : BestScoreRepository {
 
     private companion object {
-        val BEST_SCORE_KEY = intPreferencesKey("best_score")
+       private val BEST_SCORE_KEY = intPreferencesKey("best_score")
     }
 
     override fun getBestScore(): Flow<Int> {
