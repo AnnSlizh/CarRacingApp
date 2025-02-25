@@ -1,9 +1,11 @@
-package by.slizh.carracingapp
+package by.slizh.carracingapp.presentation.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import by.slizh.carracingapp.components.Lane
+import by.slizh.carracingapp.domain.repository.BestScoreRepository
+import by.slizh.carracingapp.presentation.components.Lane
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +14,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GameViewModel @Inject constructor() : ViewModel() {
+class GameViewModel @Inject constructor(
+    private val bestScoreRepository: BestScoreRepository
+) : ViewModel() {
+
     private val _gameState = MutableStateFlow(
         GameState(
             playerLane = Lane.CENTER,
@@ -29,8 +34,17 @@ class GameViewModel @Inject constructor() : ViewModel() {
     private val roadSpeed = 3.5f
 
     init {
+        getBestScore()
         startGame()
         startTimer()
+    }
+
+    private fun getBestScore() {
+        viewModelScope.launch(Dispatchers.IO) {
+            bestScoreRepository.getBestScore().collect { score ->
+                _gameState.value = _gameState.value.copy(bestScore = score)
+            }
+        }
     }
 
     private fun startGame() {
@@ -57,6 +71,10 @@ class GameViewModel @Inject constructor() : ViewModel() {
                     score = newScore,
                     gameOver = collision
                 )
+
+                if (_gameState.value.gameOver) {
+                    saveBestScore(newScore)
+                }
             }
         }
 
@@ -64,6 +82,16 @@ class GameViewModel @Inject constructor() : ViewModel() {
             while (!_gameState.value.gameOver && _gameState.value.timeLeft > 0) {
                 delay(1000L)
                 addPoliceCar()
+            }
+        }
+    }
+
+    private fun saveBestScore(newScore: Int) {
+        if (newScore > _gameState.value.bestScore) {
+            viewModelScope.launch(Dispatchers.IO) {
+                bestScoreRepository.saveBestScore(newScore)
+                _gameState.value =
+                    _gameState.value.copy(bestScore = newScore)
             }
         }
     }
@@ -77,7 +105,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun movePlayerLeft() {
+    fun movePlayerCarLeft() {
         _gameState.value = _gameState.value.copy(
             playerLane = when (_gameState.value.playerLane) {
                 Lane.RIGHT -> Lane.CENTER
@@ -87,7 +115,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         )
     }
 
-    fun movePlayerRight() {
+    fun movePlayerCarRight() {
         _gameState.value = _gameState.value.copy(
             playerLane = when (_gameState.value.playerLane) {
                 Lane.LEFT -> Lane.CENTER
@@ -107,7 +135,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         if (availableLanes.isNotEmpty()) {
             val newCarLane = availableLanes.random()
             _gameState.value = _gameState.value.copy(
-                obstacles = _gameState.value.obstacles + (newCarLane to -90f)
+                obstacles = _gameState.value.obstacles + (newCarLane to 0f)
             )
         }
     }
