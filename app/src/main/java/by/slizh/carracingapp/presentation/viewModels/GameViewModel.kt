@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,7 +43,7 @@ class GameViewModel @Inject constructor(
     private fun getBestScore() {
         viewModelScope.launch(Dispatchers.IO) {
             bestScoreRepository.getBestScore().collect { score ->
-                _gameState.value = _gameState.value.copy(bestScore = score)
+                _gameState.update { it.copy(bestScore = score) }
             }
         }
     }
@@ -52,28 +53,30 @@ class GameViewModel @Inject constructor(
             while (!_gameState.value.gameOver && _gameState.value.timeLeft > 0) {
                 delay(16L)
 
-                val updatedObstacles =
-                    _gameState.value.obstacles.map { (x, y) -> x to y + roadSpeed }
-                        .filter { (_, y) -> y < 600f }
+                _gameState.update { currentState ->
+                    val updatedObstacles =
+                        currentState.obstacles.map { (x, y) -> x to y + roadSpeed }
+                            .filter { (_, y) -> y < 600f }
 
-                val collision = updatedObstacles.any { (lane, y) ->
-                    lane == _gameState.value.playerLane &&
-                            y < _gameState.value.playerY + 80f &&
-                            y + 80f > _gameState.value.playerY
+                    val collision = updatedObstacles.any { (lane, y) ->
+                        lane == currentState.playerLane &&
+                                y < currentState.playerY + 80f &&
+                                y + 80f > currentState.playerY
+                    }
+
+                    val newScore = currentState.score + currentState.obstacles.count { (_, y) ->
+                        y < currentState.playerY && y + roadSpeed >= currentState.playerY
+                    }
+
+                    currentState.copy(
+                        obstacles = updatedObstacles,
+                        score = newScore,
+                        gameOver = collision
+                    )
                 }
-
-                val newScore = _gameState.value.score + _gameState.value.obstacles.count { (_, y) ->
-                    y < _gameState.value.playerY && y + roadSpeed >= _gameState.value.playerY
-                }
-
-                _gameState.value = _gameState.value.copy(
-                    obstacles = updatedObstacles,
-                    score = newScore,
-                    gameOver = collision
-                )
 
                 if (_gameState.value.gameOver) {
-                    saveBestScore(newScore)
+                    saveBestScore(_gameState.value.score)
                 }
             }
         }
@@ -90,8 +93,8 @@ class GameViewModel @Inject constructor(
         if (newScore > _gameState.value.bestScore) {
             viewModelScope.launch(Dispatchers.IO) {
                 bestScoreRepository.saveBestScore(newScore)
-                _gameState.value =
-                    _gameState.value.copy(bestScore = newScore)
+                _gameState.update { it.copy(bestScore = newScore) }
+
             }
         }
     }
@@ -100,43 +103,51 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch {
             while (!_gameState.value.gameOver && _gameState.value.timeLeft > 0) {
                 delay(1000)
-                _gameState.value = _gameState.value.copy(timeLeft = _gameState.value.timeLeft - 1)
+                _gameState.update { it.copy(timeLeft = it.timeLeft - 1) }
             }
         }
     }
 
     fun movePlayerCarLeft() {
-        _gameState.value = _gameState.value.copy(
-            playerLane = when (_gameState.value.playerLane) {
-                Lane.RIGHT -> Lane.CENTER
-                Lane.CENTER -> Lane.LEFT
-                Lane.LEFT -> Lane.LEFT
-            }
-        )
+        _gameState.update { currentState ->
+            currentState.copy(
+                playerLane = when (currentState.playerLane) {
+                    Lane.RIGHT -> Lane.CENTER
+                    Lane.CENTER -> Lane.LEFT
+                    Lane.LEFT -> Lane.LEFT
+                }
+            )
+        }
     }
 
     fun movePlayerCarRight() {
-        _gameState.value = _gameState.value.copy(
-            playerLane = when (_gameState.value.playerLane) {
-                Lane.LEFT -> Lane.CENTER
-                Lane.CENTER -> Lane.RIGHT
-                Lane.RIGHT -> Lane.RIGHT
-            }
-        )
+        _gameState.update { currentState ->
+            currentState.copy(
+                playerLane = when (currentState.playerLane) {
+                    Lane.LEFT -> Lane.CENTER
+                    Lane.CENTER -> Lane.RIGHT
+                    Lane.RIGHT -> Lane.RIGHT
+                }
+            )
+        }
     }
 
     private fun addPoliceCar() {
-        val occupiedLanes = _gameState.value.obstacles
-            .filter { it.second < 150f }
-            .map { it.first }
+        _gameState.update { currentState ->
+            val occupiedLanes = currentState.obstacles
+                .filter { it.second < 150f }
+                .map { it.first }
 
-        val availableLanes = Lane.entries.filterNot { it in occupiedLanes }
+            val availableLanes = Lane.entries.filterNot { it in occupiedLanes }
 
-        if (availableLanes.isNotEmpty()) {
-            val newCarLane = availableLanes.random()
-            _gameState.value = _gameState.value.copy(
-                obstacles = _gameState.value.obstacles + (newCarLane to 0f)
-            )
+            if (availableLanes.isNotEmpty()) {
+                val newCarLane = availableLanes.random()
+                currentState.copy(
+                    obstacles = currentState.obstacles + (newCarLane to 0f)
+                )
+            } else {
+                currentState
+            }
         }
     }
 }
