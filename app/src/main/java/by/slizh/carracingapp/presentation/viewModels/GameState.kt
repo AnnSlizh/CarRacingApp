@@ -1,6 +1,6 @@
-package by.slizh.carracingapp
+package by.slizh.carracingapp.presentation.viewModels
 
-import by.slizh.carracingapp.components.Lane
+import by.slizh.carracingapp.presentation.components.Lane
 
 data class GameState(
     val playerLane: Lane = Lane.CENTER,

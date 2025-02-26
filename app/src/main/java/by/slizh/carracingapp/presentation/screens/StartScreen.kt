@@ -1,4 +1,4 @@
-package by.slizh.carracingapp.screens
+package by.slizh.carracingapp.presentation.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,6 +14,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,13 +26,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import by.slizh.carracingapp.R
 import by.slizh.carracingapp.navigation.Screen
+import by.slizh.carracingapp.presentation.viewModels.StartViewModel
 import by.slizh.carracingapp.ui.theme.Red
 
 @Composable
-fun StartScreen(navController: NavController) {
+fun StartScreen(
+    navController: NavController,
+    startViewModel: StartViewModel = hiltViewModel()
+) {
+    val bestScore by startViewModel.bestScore.collectAsState()
+
     Box {
         Image(
             modifier = Modifier.fillMaxSize(),
@@ -63,7 +72,7 @@ fun StartScreen(navController: NavController) {
                         .padding(horizontal = 15.dp, vertical = 5.dp)
                 ) {
                     Text(
-                        text = "11",
+                        text = bestScore.toString(),
                         fontSize = 50.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
