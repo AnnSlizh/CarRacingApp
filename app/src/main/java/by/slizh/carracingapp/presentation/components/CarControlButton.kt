@@ -1,14 +1,12 @@
-package by.slizh.carracingapp.components
+package by.slizh.carracingapp.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -17,9 +15,13 @@ import androidx.compose.ui.unit.dp
 import by.slizh.carracingapp.R
 
 @Composable
-fun CarControlButton(onMoveLeft: () -> Unit, onMoveRight: () -> Unit) {
+fun CarControlButton(
+    modifier: Modifier = Modifier,
+    onMoveLeft: () -> Unit,
+    onMoveRight: () -> Unit
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween

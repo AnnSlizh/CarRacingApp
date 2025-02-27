@@ -1,4 +1,4 @@
-package by.slizh.carracingapp.components
+package by.slizh.carracingapp.presentation.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -18,13 +18,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Road() {
+fun Road(modifier: Modifier) {
     val density = LocalDensity.current
     val screenWidth = with(density) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
-    val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
-    val roadWidth = screenWidth * 0.9f
-    val roadStartX = (screenWidth - roadWidth) / 2
-    val laneWidth = roadWidth / 3
+    val roadStartX = (screenWidth - screenWidth) / 2
+    val laneWidth = screenWidth / 3
 
     val lineWidth = 10f
     val lineHeight = 80f
@@ -43,18 +41,18 @@ fun Road() {
         ), label = ""
     )
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas(modifier = modifier) {
         drawRect(
             color = Color.DarkGray,
             topLeft = Offset(roadStartX, 0f),
-            size = Size(roadWidth, screenHeight)
+            size = Size(screenWidth, size.height)
         )
 
         for (i in 1..2) {
             val lineX = roadStartX + laneWidth * i - lineWidth / 2
             var startY = offsetY.value - totalLineOffset
 
-            while (startY < screenHeight) {
+            while (startY < size.height) {
                 drawRect(
                     color = Color.White,
                     topLeft = Offset(lineX, startY),

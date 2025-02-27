@@ -11,4 +11,7 @@
     <string name="move_left">Move Left</string>
     <string name="move_right">Move Right</string>
     <string name="police_car">Police car</string>
+
+    //GameOver screen
+    <string name="game_over">Game over</string>
 </resources>

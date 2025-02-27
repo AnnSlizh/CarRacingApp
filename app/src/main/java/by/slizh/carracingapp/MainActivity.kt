@@ -12,9 +12,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import by.slizh.carracingapp.navigation.Screen
-import by.slizh.carracingapp.screens.GameOverScreen
-import by.slizh.carracingapp.screens.GameScreen
-import by.slizh.carracingapp.screens.StartScreen
+import by.slizh.carracingapp.presentation.screens.GameOverScreen
+import by.slizh.carracingapp.presentation.screens.GameScreen
+import by.slizh.carracingapp.presentation.screens.StartScreen
 import by.slizh.carracingapp.ui.theme.CarRacingAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 

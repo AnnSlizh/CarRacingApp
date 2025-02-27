@@ -1,4 +1,4 @@
-package by.slizh.carracingapp.components
+package by.slizh.carracingapp.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.offset
@@ -13,7 +13,7 @@ import by.slizh.carracingapp.R
 enum class Lane(val positionX: Float) {
     LEFT(50f),
     CENTER(150f),
-    RIGHT(250f);
+    RIGHT(270f);
 }
 
 @Composable
